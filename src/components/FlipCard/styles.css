@@ -46,6 +46,7 @@
 .flip-card__perspective {
   width: 100%;
   height: 100%;
+  margin-top: 23px;
   min-height: inherit;
   perspective: 1000px;
 }
