@@ -646,7 +646,7 @@ export function FlipCard({
                 )}
               </div>
 
-              {link && (
+              {link ? (
                 <a
                   className="flip-card__cta"
                   href={link}
@@ -656,6 +656,10 @@ export function FlipCard({
                 >
                   {ctaLabel}
                 </a>
+              ) : (
+                <div className="flip-card__cta flip-card__cta--disabled" aria-disabled="true">
+                  {ctaLabel}
+                </div>
               )}
             </motion.div>
           </motion.div>
