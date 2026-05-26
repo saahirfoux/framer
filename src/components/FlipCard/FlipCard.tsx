@@ -39,12 +39,17 @@ export type FlipCardImage = string | ResponsiveImageValue;
 export interface FlipCardProps {
   image?: FlipCardImage;
   backImage?: FlipCardImage;
+  profileImage?: FlipCardImage;
   title?: string;
   description?: string;
   backItems?: string[];
   badge?: string;
   link?: string;
   ctaLabel?: string;
+  showOnlineStatus?: boolean;
+  onlineIndicatorColor?: string;
+  ctaColor?: string;
+  ctaTextColor?: string;
 
   revealMode?: RevealMode;
   flipDirection?: FlipDirection;
@@ -144,6 +149,10 @@ const DEFAULT_PROPS: Required<
     | 'frontTitleColor'
     | 'frontDescriptionColor'
     | 'panelScoopRadius'
+    | 'showOnlineStatus'
+    | 'onlineIndicatorColor'
+    | 'ctaColor'
+    | 'ctaTextColor'
   >
 > = {
   image: DEFAULT_IMAGE,
@@ -168,6 +177,10 @@ const DEFAULT_PROPS: Required<
   frontTitleColor: '#111827',
   frontDescriptionColor: '#6b7280',
   panelScoopRadius: 35,
+  showOnlineStatus: true,
+  onlineIndicatorColor: '#22c55e',
+  ctaColor: '#111827',
+  ctaTextColor: '#ffffff',
 };
 
 // --- Flip interaction hook ---
@@ -344,12 +357,17 @@ function useFlipInteraction({
 export function FlipCard({
   image = DEFAULT_PROPS.image,
   backImage,
+  profileImage,
   title = DEFAULT_PROPS.title,
   description = DEFAULT_PROPS.description,
   backItems = DEFAULT_PROPS.backItems,
   badge,
   link,
   ctaLabel = 'Learn more',
+  showOnlineStatus = DEFAULT_PROPS.showOnlineStatus,
+  onlineIndicatorColor = DEFAULT_PROPS.onlineIndicatorColor,
+  ctaColor = DEFAULT_PROPS.ctaColor,
+  ctaTextColor = DEFAULT_PROPS.ctaTextColor,
   revealMode = DEFAULT_PROPS.revealMode,
   flipDirection = DEFAULT_PROPS.flipDirection,
   animationStyle = DEFAULT_PROPS.animationStyle,
@@ -374,6 +392,7 @@ export function FlipCard({
 }: FlipCardProps) {
   const [imageError, setImageError] = useState(false);
   const [backImageError, setBackImageError] = useState(false);
+  const [profileImageError, setProfileImageError] = useState(false);
 
   const scrollRef = useRef<HTMLElement>(null);
 
@@ -381,6 +400,12 @@ export function FlipCard({
   const frontImageSrcSet = resolveImageSrcSet(image);
   const backImageSrc = resolveImageSrc(backImage);
   const backImageSrcSet = resolveImageSrcSet(backImage);
+  const profileImageSrc =
+    resolveImageSrc(profileImage) ?? frontImageSrc;
+  const profileImageSrcSet = profileImage
+    ? resolveImageSrcSet(profileImage)
+    : frontImageSrcSet;
+  const profileImageSource = profileImage ?? image;
 
   useEffect(() => {
     setImageError(false);
@@ -389,6 +414,10 @@ export function FlipCard({
   useEffect(() => {
     setBackImageError(false);
   }, [backImageSrc]);
+
+  useEffect(() => {
+    setProfileImageError(false);
+  }, [profileImageSrc]);
 
   const {
     flipped,
@@ -443,6 +472,9 @@ export function FlipCard({
     '--flip-front-title': frontTitleColor,
     '--flip-front-desc': frontDescriptionColor,
     '--flip-scoop-corner': `${panelScoopRadius}px`,
+    '--flip-cta-bg': ctaColor,
+    '--flip-cta-text': ctaTextColor,
+    '--flip-online': onlineIndicatorColor,
   } as CSSProperties;
 
   const rootClassName = [
@@ -452,6 +484,7 @@ export function FlipCard({
     isInteractive && 'flip-card--interactive',
     flipped && 'flip-card--flipped',
     showScoop && 'flip-card--scoop',
+    link && 'flip-card--has-cta',
     className,
   ]
     .filter(Boolean)
@@ -564,7 +597,7 @@ export function FlipCard({
               )}
             </motion.div>
             <motion.div
-              className="flip-card__back-content"
+              className="flip-card__back-body"
               initial={false}
               animate={
                 prefersReducedMotion
@@ -573,16 +606,44 @@ export function FlipCard({
               }
               transition={transition}
             >
-              {badge && <span className="flip-card__badge">{badge}</span>}
-              {backItems.length > 0 && (
-                <ul className="flip-card__back-list">
-                  {backItems.map((item) => (
-                    <li key={item} className="flip-card__back-list-item">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <div className="flip-card__avatar-wrap">
+                <div className="flip-card__avatar">
+                  {!profileImageError && profileImageSrc ? (
+                    <img
+                      className="flip-card__avatar-image"
+                      src={profileImageSrc}
+                      srcSet={profileImageSrcSet}
+                      alt={resolveImageAlt(profileImageSource, imageAlt)}
+                      onError={() => setProfileImageError(true)}
+                    />
+                  ) : (
+                    <div
+                      className="flip-card__avatar-image flip-card__avatar-image--fallback"
+                      aria-hidden
+                    />
+                  )}
+                  {showOnlineStatus && (
+                    <span
+                      className="flip-card__online-indicator"
+                      aria-hidden
+                    />
+                  )}
+                </div>
+              </div>
+
+              <div className="flip-card__back-content">
+                {badge && <span className="flip-card__badge">{badge}</span>}
+                {backItems.length > 0 && (
+                  <ul className="flip-card__back-list">
+                    {backItems.map((item) => (
+                      <li key={item} className="flip-card__back-list-item">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
               {link && (
                 <a
                   className="flip-card__cta"

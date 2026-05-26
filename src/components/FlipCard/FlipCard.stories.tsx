@@ -43,6 +43,7 @@ const sampleContent = {
   ],
   link: 'https://example.com',
   ctaLabel: 'View profile',
+  showOnlineStatus: true,
 };
 
 export const Default: Story = {
@@ -186,6 +187,29 @@ export const ReducedMotion: Story = {
     await expect(
       canvas.getByRole('button', { name: /jason lee, showing back/i }),
     ).toBeVisible();
+  },
+};
+
+export const BackWithProfile: Story = {
+  args: {
+    ...sampleContent,
+    revealMode: 'click',
+  },
+  play: async ({ canvas, userEvent }) => {
+    const card = canvas.getByRole('button', {
+      name: /jason lee, showing front/i,
+    });
+    await userEvent.click(card);
+    const avatar = card.querySelector('.flip-card__avatar-image');
+    expect(avatar).toBeTruthy();
+    const online = card.querySelector('.flip-card__online-indicator');
+    expect(online).toBeTruthy();
+    const cta = canvas.getByRole('link', { name: /view profile/i });
+    expect(cta).toBeTruthy();
+    await expect(cta.className).toContain('flip-card__cta');
+    const ctaStyle = getComputedStyle(cta);
+    await expect(ctaStyle.borderBottomLeftRadius).toBe('40px');
+    await expect(ctaStyle.borderBottomRightRadius).toBe('40px');
   },
 };
 

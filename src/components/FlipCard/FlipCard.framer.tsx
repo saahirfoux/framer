@@ -44,6 +44,21 @@ addPropertyControls(FlipCard, {
     type: ControlType.ResponsiveImage,
     title: 'Back Photo',
   },
+  profileImage: {
+    type: ControlType.ResponsiveImage,
+    title: 'Profile Photo',
+  },
+  showOnlineStatus: {
+    type: ControlType.Boolean,
+    title: 'Online Status',
+    defaultValue: true,
+  },
+  onlineIndicatorColor: {
+    type: ControlType.Color,
+    title: 'Status Color',
+    defaultValue: '#22c55e',
+    hidden: (props) => !props.showOnlineStatus,
+  },
   backColor: {
     type: ControlType.Color,
     title: 'Back Background',
@@ -53,6 +68,16 @@ addPropertyControls(FlipCard, {
     type: ControlType.Color,
     title: 'Back Text',
     defaultValue: '#111827',
+  },
+  ctaColor: {
+    type: ControlType.Color,
+    title: 'Button Color',
+    defaultValue: '#111827',
+  },
+  ctaTextColor: {
+    type: ControlType.Color,
+    title: 'Button Text',
+    defaultValue: '#ffffff',
   },
   frontPanelColor: {
     type: ControlType.Color,
