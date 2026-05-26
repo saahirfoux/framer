@@ -68,7 +68,6 @@
 .flip-card__face--front {
   z-index: 2;
   background: var(--flip-panel-bg);
-  overflow: visible;
 }
 
 .flip-card__face--back {
