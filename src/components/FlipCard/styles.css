@@ -128,8 +128,15 @@
   box-shadow:
     0 0 0 3px var(--flip-back),
     0 4px 12px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
+  overflow: visible;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.flip-card__avatar-clip {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
 }
 
 .flip-card__avatar-image {
@@ -147,14 +154,15 @@
 
 .flip-card__online-indicator {
   position: absolute;
-  bottom: 6%;
-  right: 6%;
+  bottom: 0;
+  right: 0;
   width: 14px;
   height: 14px;
   border-radius: 50%;
   background: var(--flip-online);
   border: 2px solid var(--flip-back);
   box-sizing: border-box;
+  transform: translate(25%, 25%);
 }
 
 .flip-card__back-content {

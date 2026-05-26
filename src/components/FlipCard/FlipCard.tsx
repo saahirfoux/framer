@@ -608,20 +608,22 @@ export function FlipCard({
             >
               <div className="flip-card__avatar-wrap">
                 <div className="flip-card__avatar">
-                  {!profileImageError && profileImageSrc ? (
-                    <img
-                      className="flip-card__avatar-image"
-                      src={profileImageSrc}
-                      srcSet={profileImageSrcSet}
-                      alt={resolveImageAlt(profileImageSource, imageAlt)}
-                      onError={() => setProfileImageError(true)}
-                    />
-                  ) : (
-                    <div
-                      className="flip-card__avatar-image flip-card__avatar-image--fallback"
-                      aria-hidden
-                    />
-                  )}
+                  <div className="flip-card__avatar-clip" aria-hidden>
+                    {!profileImageError && profileImageSrc ? (
+                      <img
+                        className="flip-card__avatar-image"
+                        src={profileImageSrc}
+                        srcSet={profileImageSrcSet}
+                        alt={resolveImageAlt(profileImageSource, imageAlt)}
+                        onError={() => setProfileImageError(true)}
+                      />
+                    ) : (
+                      <div
+                        className="flip-card__avatar-image flip-card__avatar-image--fallback"
+                        aria-hidden
+                      />
+                    )}
+                  </div>
                   {showOnlineStatus && (
                     <span
                       className="flip-card__online-indicator"
