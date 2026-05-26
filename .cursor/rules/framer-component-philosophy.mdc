@@ -1,0 +1,22 @@
+---
+description: Core principles every Framer component in this repo must follow
+alwaysApply: true
+---
+
+# Framer Component Philosophy
+
+Every component must:
+
+- Render beautifully immediately with no configuration (default dimensions, content, colors)
+- Expose designer-facing concepts, not engineering internals
+- Be touch-safe and mobile-first — never assume hover exists
+- Degrade gracefully under reduced motion, missing content, extreme aspect ratios, long text
+- Survive portrait/landscape images, ultra-wide/narrow containers, mobile layouts
+- Be self-contained — local state, props, minimal deps; no global state, no routing
+- Be copy-paste portable, Storybook-compatible, and Framer-compatible
+- Prevent invalid states via fallbacks, safe defaults, and constrained enums
+- Use intentional animation that communicates state — avoid infinite loops or excessive springiness
+- Expose curated config with opinionated defaults — not every parameter
+
+**Bad controls:** `cubicBezier`, `perspectiveValue`, `transformOriginX`
+**Good controls:** `Animation Style`, `Reveal Direction`, `Reveal On`, `Smoothness`

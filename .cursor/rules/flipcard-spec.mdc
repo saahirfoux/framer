@@ -1,0 +1,46 @@
+---
+description: FlipCard component API, interaction rules, and scroll reveal spec
+globs: src/components/FlipCard/**
+alwaysApply: false
+---
+
+# FlipCard Specification
+
+## Required Props
+
+title: string
+
+## Optional Props
+
+image (front photo), backImage (back photo), description (front only), backItems (back bullets only), badge, link, ctaLabel
+
+## Front vs Back
+
+- Front: `image` + title + description in bottom-left label panel with scoop corner
+- Back: optional `backImage` (full bleed) OR solid `backColor` (default white); `backItems` bullet list + optional CTA on content layer
+
+## Behavior Props
+
+revealMode: 'click' | 'hover' | 'tap' | 'scroll'
+flipDirection: 'horizontal' | 'vertical'
+animationStyle: 'smooth' | 'snappy' | 'dramatic'
+mobileBehavior: 'tap' | 'scroll' | 'disabled'
+autoFlip?: boolean, autoFlipDelay?: number
+
+## Appearance Props
+
+borderRadius, shadow, backColor, textColor, overlayColor, padding, frontPanelColor, frontTitleColor, frontDescriptionColor, panelScoopRadius
+
+## Interaction Rules
+
+- Desktop: hover or click
+- Mobile: tap or optional scroll reveal
+- Never rely exclusively on hover
+
+## Scroll Reveal
+
+Use IntersectionObserver or whileInView; expose threshold, once, staggerIndex
+
+## Framer
+
+Property controls live in `FlipCard.framer.tsx`. Deploy steps: `src/components/FlipCard/DEPLOY.md`.

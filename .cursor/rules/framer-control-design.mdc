@@ -1,0 +1,23 @@
+---
+description: Framer property control naming, categories, and canvas-readiness rules
+globs: src/components/**/*.tsx
+alwaysApply: false
+---
+
+# Framer Property Controls
+
+## Canvas-Ready Requirements
+
+- Works immediately when dragged onto canvas with no configuration
+- Sensible default props, stable under resizing, visually polished by default
+
+## Control Category Order
+
+Content → Layout → Appearance → Interaction → Animation → Mobile → Accessibility
+
+## Naming Conventions
+
+**Good:** `Reveal On`, `Animation Style`, `Mobile Behavior`, `Flip Direction`
+**Bad:** `usePerspectiveTransform`, `interactionTriggerMode`, `rotationVectorScalar`
+
+Designers think in behavior and feeling, not implementation details.

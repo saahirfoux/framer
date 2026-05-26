@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inverted Scoop Card</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e7e7e7;
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 40px;
+      }
+
+      .card {
+        position: relative;
+        width: 420px;
+        border-radius: 40px;
+        overflow: hidden;
+      }
+
+      .card img {
+        width: 100%;
+        display: block;
+        object-fit: cover;
+      }
+
+      .info {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+
+        background: #e7e7e7;
+
+        padding: 24px 30px 28px 24px;
+
+        border-top-right-radius: 40px;
+      }
+
+      /* SCOOP EFFECT */
+      .info::before {
+        content: "";
+        position: absolute;
+
+        width: 70px;
+        height: 70px;
+
+        right: -70px;
+        bottom: 0;
+
+        border-bottom-left-radius: 35px;
+
+        box-shadow: -25px 25px 0 #e7e7e7;
+      }
+
+      /* OPTIONAL EXTRA CURVE */
+      .info::after {
+        content: "";
+        position: absolute;
+
+        width: 70px;
+        height: 70px;
+
+        left: 0;
+        top: -70px;
+
+        border-bottom-left-radius: 35px;
+
+        box-shadow: -25px 25px 0 #e7e7e7;
+      }
+
+      h2 {
+        font-size: 48px;
+        line-height: 1;
+        color: #333;
+        margin-bottom: 10px;
+        font-weight: 500;
+      }
+
+      p {
+        font-size: 24px;
+        color: #555;
+        line-height: 1.2;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <!-- REPLACE THIS IMAGE PATH -->
+      <img src="male.png" alt="Profile Image" />
+
+      <div class="info">
+        <h2>Jason Lee</h2>
+        <p>Front-End<br />Developer</p>
+      </div>
+    </div>
+  </body>
+</html>

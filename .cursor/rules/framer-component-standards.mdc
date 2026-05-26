@@ -1,0 +1,37 @@
+---
+description: File structure, Storybook stories, accessibility, and performance standards
+globs: src/components/**
+alwaysApply: false
+---
+
+# Component Standards
+
+## Stack
+
+React · TypeScript · Vite · Framer Motion · Tailwind CSS · Storybook
+
+## File Structure
+
+```
+src/components/ComponentName/
+  ComponentName.tsx
+  ComponentName.stories.tsx
+  index.ts
+  types.ts
+  styles.css
+```
+
+## Required Storybook Stories
+
+Default, Mobile, Edge-case, Reduced Motion (when animation is central)
+Interaction stories: HoverReveal, ClickReveal, ScrollReveal, LongText, NarrowWidth, DarkMode
+
+## Accessibility
+
+Keyboard navigation, prefers-reduced-motion, semantic HTML, readable contrast, touch usability
+
+## Performance
+
+- Transforms over layout animations (GPU-friendly)
+- IntersectionObserver over scroll listeners
+- No layout thrashing; memoize when appropriate
