@@ -3,10 +3,63 @@ import { FlipCard } from './FlipCard';
 
 export default FlipCard;
 
+const labelTextOffsetControls = {
+  x: {
+    type: ControlType.Number as const,
+    title: 'Horizontal',
+    defaultValue: 0,
+    min: -64,
+    max: 64,
+    step: 1,
+    unit: 'px',
+  },
+  y: {
+    type: ControlType.Number as const,
+    title: 'Vertical',
+    defaultValue: 0,
+    min: -64,
+    max: 64,
+    step: 1,
+    unit: 'px',
+  },
+};
+
+const imageFocalControls = {
+  x: {
+    type: ControlType.Number as const,
+    title: 'X',
+    defaultValue: 0.5,
+    min: 0,
+    max: 1,
+    step: 0.05,
+  },
+  y: {
+    type: ControlType.Number as const,
+    title: 'Y',
+    defaultValue: 0.5,
+    min: 0,
+    max: 1,
+    step: 0.05,
+  },
+};
+
 addPropertyControls(FlipCard, {
   image: {
     type: ControlType.ResponsiveImage,
     title: 'Photo',
+  },
+  frontImageFocal: {
+    type: ControlType.Object,
+    title: 'Photo Position',
+    controls: imageFocalControls,
+  },
+  frontImageZoom: {
+    type: ControlType.Number,
+    title: 'Photo Zoom',
+    defaultValue: 1,
+    min: 0.5,
+    max: 2,
+    step: 0.05,
   },
   title: {
     type: ControlType.String,
@@ -18,6 +71,17 @@ addPropertyControls(FlipCard, {
     title: 'Description',
     defaultValue: 'Front-End Developer',
     displayTextArea: true,
+    hidden: (props) => !props.showLabel,
+  },
+  showLabel: {
+    type: ControlType.Boolean,
+    title: 'Show Label',
+    defaultValue: true,
+  },
+  showBackItems: {
+    type: ControlType.Boolean,
+    title: 'Show Back List',
+    defaultValue: false,
   },
   backItems: {
     type: ControlType.Array,
@@ -26,23 +90,46 @@ addPropertyControls(FlipCard, {
       type: ControlType.String,
     },
     defaultValue: ['5+ years experience', 'React & TypeScript', 'Based in NYC'],
+    hidden: (props) => !props.showBackItems,
   },
   badge: {
     type: ControlType.String,
     title: 'Badge',
   },
+  showCta: {
+    type: ControlType.Boolean,
+    title: 'Show Button',
+    defaultValue: true,
+  },
   link: {
     type: ControlType.Link,
     title: 'Link',
+    hidden: (props) => !props.showCta,
   },
   ctaLabel: {
     type: ControlType.String,
     title: 'CTA Label',
     defaultValue: 'Learn more',
+    hidden: (props) => !props.showCta,
   },
   backImage: {
     type: ControlType.ResponsiveImage,
     title: 'Back Photo',
+  },
+  backImageFocal: {
+    type: ControlType.Object,
+    title: 'Back Photo Position',
+    controls: imageFocalControls,
+    hidden: (props) => !props.backImage,
+  },
+  backImageZoom: {
+    type: ControlType.Number,
+    title: 'Back Photo Zoom',
+    defaultValue: 1,
+    min: 0.5,
+    max: 2,
+    step: 0.05,
+    hidden: (props) => !props.backImage,
   },
   profileImage: {
     type: ControlType.ResponsiveImage,
@@ -51,7 +138,7 @@ addPropertyControls(FlipCard, {
   showOnlineStatus: {
     type: ControlType.Boolean,
     title: 'Online Status',
-    defaultValue: true,
+    defaultValue: false,
   },
   onlineIndicatorColor: {
     type: ControlType.Color,
@@ -83,16 +170,55 @@ addPropertyControls(FlipCard, {
     type: ControlType.Color,
     title: 'Panel Background',
     defaultValue: '#ffffff',
+    hidden: (props) => !props.showLabel,
   },
   frontTitleColor: {
     type: ControlType.Color,
     title: 'Title Color',
     defaultValue: '#111827',
+    hidden: (props) => !props.showLabel,
   },
   frontDescriptionColor: {
     type: ControlType.Color,
     title: 'Description Color',
     defaultValue: '#6b7280',
+    hidden: (props) => !props.showLabel,
+  },
+  labelPanelScale: {
+    type: ControlType.Number,
+    title: 'Panel Scale',
+    defaultValue: 0.5,
+    min: 0.25,
+    max: 1,
+    step: 0.05,
+    displayStepper: true,
+    hidden: (props) => !props.showLabel,
+  },
+  labelTextOffset: {
+    type: ControlType.Object,
+    title: 'Text Position',
+    controls: labelTextOffsetControls,
+    hidden: (props) => !props.showLabel,
+  },
+  labelPanelExtraWidth: {
+    type: ControlType.Number,
+    title: 'Panel Width',
+    defaultValue: 0,
+    min: 0,
+    max: 120,
+    step: 4,
+    unit: 'px',
+    displayStepper: true,
+    hidden: (props) => !props.showLabel,
+  },
+  labelPanelPadding: {
+    type: ControlType.Number,
+    title: 'Panel Padding',
+    defaultValue: 24,
+    min: 0,
+    max: 64,
+    unit: 'px',
+    hidden: (props) => !props.showLabel,
   },
   borderRadius: {
     type: ControlType.Number,
@@ -109,6 +235,7 @@ addPropertyControls(FlipCard, {
     min: 0,
     max: 60,
     unit: 'px',
+    hidden: (props) => !props.showLabel,
   },
   padding: {
     type: ControlType.Number,

@@ -36,16 +36,33 @@ export type ResponsiveImageValue = {
 
 export type FlipCardImage = string | ResponsiveImageValue;
 
+export type ImageFocalPoint = {
+  x: number;
+  y: number;
+};
+
+export type LabelTextOffset = {
+  x: number;
+  y: number;
+};
+
 export interface FlipCardProps {
   image?: FlipCardImage;
   backImage?: FlipCardImage;
   profileImage?: FlipCardImage;
+  frontImageFocal?: ImageFocalPoint;
+  frontImageZoom?: number;
+  backImageFocal?: ImageFocalPoint;
+  backImageZoom?: number;
   title?: string;
   description?: string;
+  showLabel?: boolean;
   backItems?: string[];
+  showBackItems?: boolean;
   badge?: string;
   link?: string;
   ctaLabel?: string;
+  showCta?: boolean;
   showOnlineStatus?: boolean;
   onlineIndicatorColor?: string;
   ctaColor?: string;
@@ -74,6 +91,10 @@ export interface FlipCardProps {
   frontTitleColor?: string;
   frontDescriptionColor?: string;
   panelScoopRadius?: number;
+  labelPanelScale?: number;
+  labelTextOffset?: LabelTextOffset;
+  labelPanelPadding?: number;
+  labelPanelExtraWidth?: number;
 
   className?: string;
   style?: CSSProperties;
@@ -102,6 +123,70 @@ function resolveImageSrcSet(image?: FlipCardImage): string | undefined {
 function resolveImageAlt(image?: FlipCardImage, fallback = ''): string {
   if (!image || typeof image === 'string') return fallback;
   return image.alt?.trim() || fallback;
+}
+
+const DEFAULT_IMAGE_FOCAL: ImageFocalPoint = { x: 0.5, y: 0.5 };
+
+function clampLabelPanelScale(scale?: number): number {
+  return Math.min(1, Math.max(0.25, scale ?? 0.5));
+}
+
+function clampLabelPanelExtraWidth(width?: number): number {
+  return Math.min(120, Math.max(0, width ?? 0));
+}
+
+function FlipCardDecisionIcons() {
+  return (
+    <div className="flip-card__decision-icons" aria-hidden>
+      <svg
+        className="flip-card__decision-icon flip-card__decision-icon--approve"
+        width="10"
+        height="10"
+        viewBox="0 0 10 10"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="5" cy="5" r="4.25" stroke="#22c55e" strokeWidth="1" />
+        <path
+          d="M3 5.25L4.35 6.6L7 3.75"
+          stroke="#22c55e"
+          strokeWidth="1"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+      <svg
+        className="flip-card__decision-icon flip-card__decision-icon--reject"
+        width="10"
+        height="10"
+        viewBox="0 0 10 10"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="5" cy="5" r="4.25" stroke="#ef4444" strokeWidth="1" />
+        <path
+          d="M3.5 3.5L6.5 6.5M6.5 3.5L3.5 6.5"
+          stroke="#ef4444"
+          strokeWidth="1"
+          strokeLinecap="round"
+        />
+      </svg>
+    </div>
+  );
+}
+
+function imageFramingStyle(
+  focal?: ImageFocalPoint,
+  zoom?: number,
+): CSSProperties {
+  const x = `${(focal?.x ?? 0.5) * 100}%`;
+  const y = `${(focal?.y ?? 0.5) * 100}%`;
+  const scale = zoom ?? 1;
+  return {
+    objectPosition: `${x} ${y}`,
+    transform: `scale(${scale})`,
+    transformOrigin: `${x} ${y}`,
+  };
 }
 
 // --- Defaults ---
@@ -149,10 +234,20 @@ const DEFAULT_PROPS: Required<
     | 'frontTitleColor'
     | 'frontDescriptionColor'
     | 'panelScoopRadius'
+    | 'labelPanelScale'
+    | 'showLabel'
+    | 'showCta'
+    | 'showBackItems'
     | 'showOnlineStatus'
     | 'onlineIndicatorColor'
     | 'ctaColor'
     | 'ctaTextColor'
+    | 'frontImageFocal'
+    | 'frontImageZoom'
+    | 'backImageFocal'
+    | 'backImageZoom'
+    | 'labelTextOffset'
+    | 'labelPanelExtraWidth'
   >
 > = {
   image: DEFAULT_IMAGE,
@@ -177,10 +272,20 @@ const DEFAULT_PROPS: Required<
   frontTitleColor: '#111827',
   frontDescriptionColor: '#6b7280',
   panelScoopRadius: 35,
-  showOnlineStatus: true,
+  labelPanelScale: 0.5,
+  showLabel: true,
+  showCta: true,
+  showBackItems: false,
+  showOnlineStatus: false,
   onlineIndicatorColor: '#22c55e',
   ctaColor: '#111827',
   ctaTextColor: '#ffffff',
+  frontImageFocal: DEFAULT_IMAGE_FOCAL,
+  frontImageZoom: 1,
+  backImageFocal: DEFAULT_IMAGE_FOCAL,
+  backImageZoom: 1,
+  labelTextOffset: { x: 0, y: 0 },
+  labelPanelExtraWidth: 0,
 };
 
 // --- Flip interaction hook ---
@@ -358,12 +463,19 @@ export function FlipCard({
   image = DEFAULT_PROPS.image,
   backImage,
   profileImage,
+  frontImageFocal = DEFAULT_PROPS.frontImageFocal,
+  frontImageZoom = DEFAULT_PROPS.frontImageZoom,
+  backImageFocal = DEFAULT_PROPS.backImageFocal,
+  backImageZoom = DEFAULT_PROPS.backImageZoom,
   title = DEFAULT_PROPS.title,
   description = DEFAULT_PROPS.description,
+  showLabel = DEFAULT_PROPS.showLabel,
   backItems = DEFAULT_PROPS.backItems,
+  showBackItems = DEFAULT_PROPS.showBackItems,
   badge,
   link,
   ctaLabel = 'Learn more',
+  showCta = DEFAULT_PROPS.showCta,
   showOnlineStatus = DEFAULT_PROPS.showOnlineStatus,
   onlineIndicatorColor = DEFAULT_PROPS.onlineIndicatorColor,
   ctaColor = DEFAULT_PROPS.ctaColor,
@@ -387,9 +499,16 @@ export function FlipCard({
   frontTitleColor = DEFAULT_PROPS.frontTitleColor,
   frontDescriptionColor = DEFAULT_PROPS.frontDescriptionColor,
   panelScoopRadius = DEFAULT_PROPS.panelScoopRadius,
+  labelPanelScale = DEFAULT_PROPS.labelPanelScale,
+  labelTextOffset = DEFAULT_PROPS.labelTextOffset,
+  labelPanelPadding,
+  labelPanelExtraWidth = DEFAULT_PROPS.labelPanelExtraWidth,
   className,
   style,
 }: FlipCardProps) {
+  const panelScale = clampLabelPanelScale(labelPanelScale);
+  const panelPadding = labelPanelPadding ?? padding;
+  const panelExtraWidth = clampLabelPanelExtraWidth(labelPanelExtraWidth);
   const [imageError, setImageError] = useState(false);
   const [backImageError, setBackImageError] = useState(false);
   const [profileImageError, setProfileImageError] = useState(false);
@@ -460,7 +579,7 @@ export function FlipCard({
     return { [rotateAxis]: rotateValue };
   }, [prefersReducedMotion, rotateAxis, rotateValue]);
 
-  const showScoop = panelScoopRadius > 0;
+  const showScoop = showLabel && panelScoopRadius > 0;
 
   const cssVars = {
     '--flip-radius': `${borderRadius}px`,
@@ -471,7 +590,12 @@ export function FlipCard({
     '--flip-panel-bg': frontPanelColor,
     '--flip-front-title': frontTitleColor,
     '--flip-front-desc': frontDescriptionColor,
-    '--flip-scoop-corner': `${panelScoopRadius}px`,
+    '--flip-panel-scale': String(panelScale),
+    '--flip-panel-padding': `${panelPadding}px`,
+    '--flip-text-offset-x': `${labelTextOffset.x}px`,
+    '--flip-text-offset-y': `${labelTextOffset.y}px`,
+    '--flip-panel-extra-width': `${panelExtraWidth}px`,
+    '--flip-scoop-corner': `${panelScoopRadius * panelScale}px`,
     '--flip-cta-bg': ctaColor,
     '--flip-cta-text': ctaTextColor,
     '--flip-online': onlineIndicatorColor,
@@ -484,7 +608,7 @@ export function FlipCard({
     isInteractive && 'flip-card--interactive',
     flipped && 'flip-card--flipped',
     showScoop && 'flip-card--scoop',
-    link && 'flip-card--has-cta',
+    showCta && 'flip-card--has-cta',
     className,
   ]
     .filter(Boolean)
@@ -534,6 +658,7 @@ export function FlipCard({
                   src={frontImageSrc}
                   srcSet={frontImageSrcSet}
                   alt={resolveImageAlt(image, imageAlt)}
+                  style={imageFramingStyle(frontImageFocal, frontImageZoom)}
                   onError={() => setImageError(true)}
                 />
               ) : (
@@ -544,22 +669,26 @@ export function FlipCard({
               )}
             </motion.div>
 
-            <motion.div
-              className="flip-card__label-panel"
-              initial={false}
-              animate={
-                prefersReducedMotion
-                  ? { opacity: flipped ? 0 : 1 }
-                  : undefined
-              }
-              transition={transition}
-            >
-              {badge && <span className="flip-card__badge">{badge}</span>}
-              <h3 className="flip-card__front-title">{displayTitle}</h3>
-              {description && (
-                <p className="flip-card__front-description">{description}</p>
-              )}
-            </motion.div>
+            {showLabel && (
+              <motion.div
+                className="flip-card__label-panel"
+                initial={false}
+                animate={
+                  prefersReducedMotion
+                    ? { opacity: flipped ? 0 : 1 }
+                    : undefined
+                }
+                transition={transition}
+              >
+                {badge && <span className="flip-card__badge">{badge}</span>}
+                <div className="flip-card__label-content">
+                  <h3 className="flip-card__front-title">{displayTitle}</h3>
+                  {description && (
+                    <p className="flip-card__front-description">{description}</p>
+                  )}
+                </div>
+              </motion.div>
+            )}
           </motion.div>
 
           <motion.div
@@ -590,6 +719,7 @@ export function FlipCard({
                   src={backImageSrc}
                   srcSet={backImageSrcSet}
                   alt=""
+                  style={imageFramingStyle(backImageFocal, backImageZoom)}
                   onError={() => setBackImageError(true)}
                 />
               ) : (
@@ -635,7 +765,7 @@ export function FlipCard({
 
               <div className="flip-card__back-content">
                 {badge && <span className="flip-card__badge">{badge}</span>}
-                {backItems.length > 0 && (
+                {showBackItems && backItems.length > 0 && (
                   <ul className="flip-card__back-list">
                     {backItems.map((item) => (
                       <li key={item} className="flip-card__back-list-item">
@@ -646,21 +776,28 @@ export function FlipCard({
                 )}
               </div>
 
-              {link ? (
-                <a
-                  className="flip-card__cta"
-                  href={link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  {ctaLabel}
-                </a>
-              ) : (
-                <div className="flip-card__cta flip-card__cta--disabled" aria-disabled="true">
-                  {ctaLabel}
-                </div>
-              )}
+              <div className="flip-card__back-footer">
+                <FlipCardDecisionIcons />
+                {showCta &&
+                  (link ? (
+                    <a
+                      className="flip-card__cta"
+                      href={link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {ctaLabel}
+                    </a>
+                  ) : (
+                    <div
+                      className="flip-card__cta flip-card__cta--disabled"
+                      aria-disabled="true"
+                    >
+                      {ctaLabel}
+                    </div>
+                  ))}
+              </div>
             </motion.div>
           </motion.div>
         </motion.div>

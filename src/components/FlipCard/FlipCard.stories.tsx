@@ -41,14 +41,26 @@ const sampleContent = {
     'React & TypeScript',
     'Based in NYC',
   ],
+  showBackItems: true,
   link: 'https://example.com',
   ctaLabel: 'View profile',
-  showOnlineStatus: true,
+  showOnlineStatus: false,
 };
 
 export const Default: Story = {
   args: {
     ...sampleContent,
+  },
+};
+
+export const NoLabel: Story = {
+  args: {
+    ...sampleContent,
+    showLabel: false,
+  },
+  play: async ({ canvas }) => {
+    await expect(canvas.queryByText(sampleContent.description)).toBeNull();
+    await expect(document.querySelector('.flip-card__label-panel')).toBeNull();
   },
 };
 
@@ -194,6 +206,7 @@ export const BackWithProfile: Story = {
   args: {
     ...sampleContent,
     revealMode: 'click',
+    showOnlineStatus: true,
   },
   play: async ({ canvas, userEvent }) => {
     const card = canvas.getByRole('button', {
@@ -275,11 +288,35 @@ export const NarrowWidth: Story = {
   ],
 };
 
+export const NoCta: Story = {
+  args: {
+    ...sampleContent,
+    revealMode: 'click',
+    showCta: false,
+  },
+};
+
+export const NoBackList: Story = {
+  args: {
+    ...sampleContent,
+    revealMode: 'click',
+    showBackItems: false,
+  },
+  play: async ({ canvas, userEvent }) => {
+    const card = canvas.getByRole('button', {
+      name: /jason lee, showing front/i,
+    });
+    await userEvent.click(card);
+    expect(canvas.queryByText('React & TypeScript')).toBeNull();
+  },
+};
+
 export const CssCheck: Story = {
   args: {
     ...sampleContent,
     title: 'Style Check',
     borderRadius: 40,
+    labelPanelScale: 0.5,
     revealMode: 'click',
   },
   play: async ({ canvas }) => {
@@ -289,6 +326,6 @@ export const CssCheck: Story = {
     expect(face).toBeTruthy();
     await expect(getComputedStyle(face!).borderRadius).toBe('40px');
     const title = canvas.getByText('Style Check');
-    await expect(getComputedStyle(title).fontSize).toBe('24px');
+    await expect(getComputedStyle(title).fontSize).toBe('12px');
   },
 };

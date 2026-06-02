@@ -5,6 +5,11 @@
   --flip-overlay: transparent;
   --flip-padding: 24px;
   --flip-panel-bg: #ffffff;
+  --flip-panel-scale: 0.5;
+  --flip-panel-padding: 24px;
+  --flip-text-offset-x: 0px;
+  --flip-text-offset-y: 0px;
+  --flip-panel-extra-width: 0px;
   --flip-front-title: #111827;
   --flip-front-desc: #6b7280;
   --flip-scoop-corner: 35px;
@@ -219,10 +224,16 @@
   bottom: 0;
   left: 0;
   z-index: 2;
-  min-width: 55%;
-  max-width: 72%;
-  padding: var(--flip-padding) calc(var(--flip-padding) + 6px)
-    calc(var(--flip-padding) + 4px) var(--flip-padding);
+  min-width: calc(
+    55% * var(--flip-panel-scale) + 20% + var(--flip-panel-extra-width)
+  );
+  max-width: calc(
+    72% * var(--flip-panel-scale) + 15% + var(--flip-panel-extra-width)
+  );
+  padding: calc(var(--flip-panel-padding) * var(--flip-panel-scale))
+    calc(var(--flip-panel-padding) * var(--flip-panel-scale) + 6px)
+    calc(var(--flip-panel-padding) * var(--flip-panel-scale) + 4px)
+    calc(var(--flip-panel-padding) * var(--flip-panel-scale));
   background: var(--flip-panel-bg);
   border-bottom-left-radius: var(--flip-radius);
   border-top-right-radius: var(--flip-radius);
@@ -231,7 +242,7 @@
 
 /* Fallback when scoop is disabled */
 .flip-card:not(.flip-card--scoop) .flip-card__label-panel {
-  border-top-right-radius: 16px;
+  border-top-right-radius: calc(16px * var(--flip-panel-scale));
 }
 
 /* Inverted scoop via box-shadow pseudo-elements (see example1.html) */
@@ -257,9 +268,14 @@
   top: calc(-1 * var(--flip-scoop-size));
 }
 
+.flip-card__label-content {
+  margin-left: var(--flip-text-offset-x);
+  margin-bottom: var(--flip-text-offset-y);
+}
+
 .flip-card__front-title {
   margin: 0;
-  font-size: 24px;
+  font-size: calc(24px * var(--flip-panel-scale));
   font-weight: 700;
   line-height: 1.2;
   color: var(--flip-front-title);
@@ -272,7 +288,7 @@
 
 .flip-card__front-description {
   margin: 0.25rem 0 0;
-  font-size: 0.9375rem;
+  font-size: max(11px, calc(0.9375rem * var(--flip-panel-scale)));
   font-weight: 400;
   line-height: 1.4;
   color: var(--flip-front-desc);
@@ -317,13 +333,39 @@
   margin-bottom: 0;
 }
 
+.flip-card__back-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 100%;
+  margin-top: auto;
+}
+
+.flip-card__decision-icons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  flex-shrink: 0;
+  padding-bottom: 8px;
+  pointer-events: none;
+}
+
+.flip-card__decision-icon {
+  display: block;
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+}
+
 .flip-card__cta {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   width: 100%;
-  margin-top: auto;
   padding: 0.875rem var(--flip-padding);
   font-size: 0.875rem;
   font-weight: 600;
@@ -342,7 +384,7 @@
 }
 
 .flip-card__cta--disabled {
-  opacity: 0.55;
+  opacity: 1;
   cursor: default;
   pointer-events: none;
 }
