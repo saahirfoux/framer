@@ -10,6 +10,16 @@ deploy/
     <ComponentName>.tsx   # single paste target (component + inlined CSS + property controls)
 ```
 
+Some components also emit static brand assets on pack (e.g. **SearchSquircleIcon**):
+
+```
+deploy/SearchSquircleIcon/
+  SearchSquircleIcon.tsx
+  favicon.svg
+  search-squircle-icon-192.png
+  search-squircle-icon-512.png
+```
+
 CSS is embedded via `PACKED_STYLES` and a `<style>` injector—no separate `styles.css` in Framer.
 
 Packed components use `function ComponentName` (not `export function`) plus a single `export default ComponentName` at the end of the file.

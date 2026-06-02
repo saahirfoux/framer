@@ -29,6 +29,18 @@ const STRIP_RULES = {
 const PACKED_STYLES_MARKER = /const PACKED_STYLES = ['"]['"];?/;
 
 /** Bundle sibling component sources into one Framer paste file. */
+/** Static brand assets copied/rasterized into deploy on pack. */
+const ASSET_EXPORTS = {
+  SearchSquircleIcon: {
+    svg: 'search-squircle-icon.svg',
+    outputs: [
+      { file: 'favicon.svg', copy: true },
+      { file: 'search-squircle-icon-192.png', width: 192, height: 192 },
+      { file: 'search-squircle-icon-512.png', width: 512, height: 512 },
+    ],
+  },
+};
+
 const INLINE_DEPS = {
   OmPricingSection: [
     {
@@ -36,13 +48,6 @@ const INLINE_DEPS = {
       importPattern:
         /^import \{[\s\S]*?\} from '\.\.\/OmPricingTierCard\/OmPricingTierCard';\n/m,
       cssImportPattern: /^import '\.\.\/OmPricingTierCard\/styles\.css';\n/m,
-    },
-  ],
-  OmLogo: [
-    {
-      component: 'SearchSquircleIcon',
-      importPattern:
-        /^import \{[\s\S]*?\} from '\.\.\/SearchSquircleIcon\/SearchSquircleIcon';\n/m,
     },
   ],
 };
@@ -143,14 +148,16 @@ function extractFramerControls(componentName, framerSource) {
   const importFramer =
     "import { addPropertyControls, ControlType } from 'framer';\n";
   const importComponent = new RegExp(
-    `^import \\{ ${componentName} \\} from '\\.\\/${componentName}';\n`,
+    `^import \\{[\\s\\S]*?\\} from '\\.\\/${componentName}';\n`,
     'm',
   );
+  const importRelative = /^import \{[\s\S]*?\} from '\.\.\/[^']+';\n/gm;
   const exportDefault = new RegExp(`^export default ${componentName};\n\n?`, 'm');
 
   const withoutImports = framerSource
     .replace(/^import \{ addPropertyControls, ControlType \} from 'framer';\n/m, '')
     .replace(importComponent, '')
+    .replace(importRelative, '')
     .replace(exportDefault, '');
 
   return (
@@ -160,7 +167,60 @@ function extractFramerControls(componentName, framerSource) {
   );
 }
 
-function packComponent(componentName) {
+/** Move ESM imports to the top so they are not buried below inlined code. */
+function hoistImports(source) {
+  const importPattern = /^import\s[\s\S]*?;\n/gm;
+  const imports = source.match(importPattern) ?? [];
+  if (imports.length === 0) return source;
+
+  let rest = source;
+  for (const statement of imports) {
+    rest = rest.replace(statement, '');
+  }
+
+  return `${imports.join('')}\n${rest.replace(/^\n+/, '')}`;
+}
+
+async function exportComponentAssets(componentName, deployDir) {
+  const config = ASSET_EXPORTS[componentName];
+  if (!config) return [];
+
+  const svgPath = join(componentsRoot, componentName, config.svg);
+  if (!existsSync(svgPath)) {
+    console.warn(
+      `Warning: ${componentName} asset source missing: ${config.svg}`,
+    );
+    return [];
+  }
+
+  const svgBuffer = readFileSync(svgPath);
+  let sharp;
+  try {
+    sharp = (await import('sharp')).default;
+  } catch {
+    console.error(
+      `Error: sharp is required for ${componentName} PNG export. Run: npm install`,
+    );
+    process.exit(1);
+  }
+
+  const written = [];
+  for (const output of config.outputs) {
+    const outPath = join(deployDir, output.file);
+    if (output.copy) {
+      writeFileSync(outPath, svgBuffer);
+    } else {
+      await sharp(svgBuffer)
+        .resize(output.width, output.height)
+        .png()
+        .toFile(outPath);
+    }
+    written.push(output.file);
+  }
+  return written;
+}
+
+async function packComponent(componentName) {
   const componentDir = join(componentsRoot, componentName);
   const deployDir = join(deployRoot, componentName);
   const tsPath = join(componentDir, `${componentName}.tsx`);
@@ -186,6 +246,7 @@ function packComponent(componentName) {
 
   let body = stripForFramer(componentName, source);
   body = inlineStyles(body, css);
+  body = hoistImports(body);
   body = prepareComponentForDeploy(componentName, body);
 
   if (!PACKED_STYLES_MARKER.test(source) && !body.includes('const PACKED_STYLES = `')) {
@@ -207,7 +268,8 @@ function packComponent(componentName) {
     unlinkSync(legacyCssPath);
   }
 
-  return deployDir;
+  const assets = await exportComponentAssets(componentName, deployDir);
+  return { deployDir, assets };
 }
 
 function parseArgs() {
@@ -243,9 +305,13 @@ if (filterName && toPack.length === 0) {
 console.log(`Packing ${toPack.length} component(s)...\n`);
 
 for (const name of toPack) {
-  packComponent(name);
+  const { assets } = await packComponent(name);
   console.log(`${name}:`);
-  console.log(`  deploy/${name}/${name}.tsx (CSS inlined)\n`);
+  console.log(`  deploy/${name}/${name}.tsx (CSS inlined)`);
+  for (const file of assets) {
+    console.log(`  deploy/${name}/${file}`);
+  }
+  console.log('');
 }
 
 console.log('Done. Copy each deploy/<ComponentName>/<ComponentName>.tsx into Framer (one file).');

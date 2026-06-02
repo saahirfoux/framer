@@ -41,6 +41,7 @@ const meta = {
   ],
   argTypes: {
     name: { control: 'text' },
+    logoSize: { control: { type: 'number', min: 12, max: 96, step: 2 } },
     nameColor: { control: 'color' },
     iconBackgroundColor: { control: 'color' },
     iconColor: { control: 'color' },
@@ -64,11 +65,17 @@ export const CustomColors: Story = {
   },
 };
 
+export const Large: Story = {
+  args: {
+    logoSize: 40,
+  },
+};
+
 export const CustomFont: Story = {
   args: {
+    logoSize: 32,
     nameFont: {
       fontFamily: 'Georgia, serif',
-      fontSize: '32px',
       fontWeight: 700,
       lineHeight: '1.1em',
     },
@@ -101,9 +108,9 @@ export const Mobile: Story = {
     viewport: { defaultViewport: 'mobile1' },
   },
   args: {
+    logoSize: 20,
     nameFont: {
       fontFamily: 'Inter, system-ui, sans-serif',
-      fontSize: '20px',
       fontWeight: 600,
       lineHeight: '1.2em',
     },

@@ -1,3 +1,12 @@
+import './styles.css';
+
+const PACKED_STYLES = '';
+
+function SearchSquircleIconStyles() {
+  if (!PACKED_STYLES) return null;
+  return <style>{PACKED_STYLES}</style>;
+}
+
 export interface SearchSquircleIconProps {
   /** Fill color of the squircle background */
   backgroundColor?: string;
@@ -37,7 +46,9 @@ export function SearchSquircleIcon({
   const labelled = Boolean(title);
 
   return (
-    <svg
+    <>
+      <SearchSquircleIconStyles />
+      <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}
       width={size}
@@ -72,5 +83,6 @@ export function SearchSquircleIcon({
         strokeLinecap="round"
       />
     </svg>
+    </>
   );
 }
