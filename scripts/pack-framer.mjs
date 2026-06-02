@@ -28,6 +28,80 @@ const STRIP_RULES = {
 
 const PACKED_STYLES_MARKER = /const PACKED_STYLES = ['"]['"];?/;
 
+/** Bundle sibling component sources into one Framer paste file. */
+const INLINE_DEPS = {
+  OmPricingSection: [
+    {
+      component: 'OmPricingTierCard',
+      importPattern:
+        /^import \{[\s\S]*?\} from '\.\.\/OmPricingTierCard\/OmPricingTierCard';\n/m,
+      cssImportPattern: /^import '\.\.\/OmPricingTierCard\/styles\.css';\n/m,
+    },
+  ],
+  OmLogo: [
+    {
+      component: 'SearchSquircleIcon',
+      importPattern:
+        /^import \{[\s\S]*?\} from '\.\.\/SearchSquircleIcon\/SearchSquircleIcon';\n/m,
+    },
+  ],
+};
+
+function stripExportsFromInlinedSource(source, componentName) {
+  return source
+    .replace(new RegExp(`^export function ${componentName}\\b`, 'm'), `function ${componentName}`)
+    .replace(/^export type /gm, 'type ')
+    .replace(/^export interface /gm, 'interface ')
+    .replace(/^export const /gm, 'const ');
+}
+
+function stripInlinedComponentArtifacts(source, componentName) {
+  return source
+    .replace(/^import ['"]\.\/styles\.css['"];\n/m, '')
+    .replace(
+      new RegExp(
+        `function ${componentName}Styles\\(\\) {[\\s\\S]*?^}\\n`,
+        'm',
+      ),
+      '',
+    )
+    .replace(PACKED_STYLES_MARKER, 'const PACKED_STYLES = \'\';')
+    .replace(
+      new RegExp(`\\s*<${componentName}Styles \\/>\\n`, 'g'),
+      '',
+    );
+}
+
+function inlineDependencies(componentName, source) {
+  const deps = INLINE_DEPS[componentName];
+  if (!deps?.length) return { source, extraCss: '' };
+
+  let merged = source;
+  const cssChunks = [];
+
+  for (const dep of deps) {
+    const depDir = join(componentsRoot, dep.component);
+    const depSource = readFileSync(
+      join(depDir, `${dep.component}.tsx`),
+      'utf8',
+    );
+    const depCssPath = join(depDir, 'styles.css');
+    if (existsSync(depCssPath)) {
+      cssChunks.push(readFileSync(depCssPath, 'utf8'));
+    }
+
+    let inlined = stripInlinedComponentArtifacts(depSource, dep.component);
+    inlined = stripExportsFromInlinedSource(inlined, dep.component);
+    merged = merged.replace(dep.importPattern, '');
+    if (dep.cssImportPattern) {
+      merged = merged.replace(dep.cssImportPattern, '');
+    }
+    merged = `${inlined.trimEnd()}\n\n${merged}`;
+  }
+
+  return { source: merged, extraCss: cssChunks.join('\n') };
+}
+
 function discoverPackableComponents() {
   if (!existsSync(componentsRoot)) return [];
 
@@ -93,9 +167,15 @@ function packComponent(componentName) {
   const framerPath = join(componentDir, `${componentName}.framer.tsx`);
   const cssPath = join(componentDir, 'styles.css');
 
-  const source = readFileSync(tsPath, 'utf8');
+  let source = readFileSync(tsPath, 'utf8');
   const framerSource = readFileSync(framerPath, 'utf8');
-  const css = readFileSync(cssPath, 'utf8');
+  let css = readFileSync(cssPath, 'utf8');
+
+  const inlined = inlineDependencies(componentName, source);
+  source = inlined.source;
+  if (inlined.extraCss) {
+    css = `${inlined.extraCss}\n${css}`;
+  }
 
   mkdirSync(deployDir, { recursive: true });
 

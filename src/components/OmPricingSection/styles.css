@@ -1,0 +1,18 @@
+.om-pricing-section {
+  --om-pricing-section-gap: 24px;
+  --om-pricing-section-columns: 3;
+
+  box-sizing: border-box;
+  display: grid;
+  width: 100%;
+  gap: var(--om-pricing-section-gap);
+  grid-template-columns: repeat(var(--om-pricing-section-columns), minmax(0, 1fr));
+  align-items: stretch;
+  color: #000000;
+}
+
+@media (max-width: 767px) {
+  .om-pricing-section {
+    --om-pricing-section-columns: 1;
+  }
+}

@@ -1,0 +1,17 @@
+.om-logo {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--om-logo-gap, 12px);
+  width: fit-content;
+  max-width: 100%;
+}
+
+.om-logo__name {
+  margin: 0;
+  color: var(--om-logo-name-color, #000000);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
